@@ -14,10 +14,12 @@ class SourceAnalyzer
 public:
     SourceAnalyzer(std::ostream &trace, 
                    global_info &gi, 
-                   source_file_info &sfi)
+                   source_file_info &sfi,
+                   bool strip_comments)
         : trace_(trace), 
           gi_(gi), 
-          sfi_(sfi)
+          sfi_(sfi),
+          strip_comments_(strip_comments)
     {}
 
     // 'last modified time' version
@@ -59,7 +61,7 @@ private:
     source_file_info &sfi_;
     std::string file_source_;
     std::string file_path_;
-
+    bool strip_comments_;
 };
 
 }

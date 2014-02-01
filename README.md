@@ -16,7 +16,7 @@ In below locations rename original cl.exe into cl_real.exe and make a copy of it
 - 32 to 64 bit cross compilation in C:\Program Files (x86)\Microsoft Visual Studio 10.0\VC\bin\x86_amd64 (VS ide on 64 bit Windows also uses that)
 - 64 bit compilation in C:\Program Files (x86)\Microsoft Visual Studio 10.0\VC\bin\amd64
 
-Copy already built cl.exe into above locations making sure 32 bit version of cl.exe is copied into first 2 location and 64bit version into 64 bit location. Also copy dll's the new cl.exe depends on or add the dll location to the PATH.
+Copy already built cl.exe into above locations making sure 32 bit version of cl.exe is copied into first 2 locations and 64bit version into 64 bit location. Also copy dll's the new cl.exe depends on or add the dll location to the PATH.
 
 
 Environment Variables
@@ -33,6 +33,9 @@ If set to 'hash', the caching program will use hash function to determine whethe
 If set to 'timestamp', the caching program will use last modified time to determine whether the source file needs recompilation
 Unset defaults to 'hash'
 
+VCLCACHE_STRIP_COMMENTS
+If set to 'true' all comments from the source code will be stripped before hashing so that it does not cause unnecessary recompilation, set to 'false' leaves file unchanged
+Unset defaults to 'true'
 
 How vclcache works
 ------------------

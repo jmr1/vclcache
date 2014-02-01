@@ -3,6 +3,7 @@
 #include <boost/regex.hpp>
 #include <boost/wave/cpplexer/cpp_lex_token.hpp>
 #include <boost/wave/cpplexer/cpp_lex_iterator.hpp>
+#include <boost/filesystem.hpp>
 
 #include "string_finder_pred.h"
 #include "StringTools.h"
@@ -33,33 +34,23 @@ namespace vclcache {
 
 /*static*/ void CompilerTools::tokenize_params(const std::string &rsp_content, std::vector<std::string> &tokens)
 {
-    StringTools::tokenize(rsp_content, "/", tokens);
-
-    std::string last;
-    std::vector<std::string>::reverse_iterator ritor = tokens.rbegin();
-    for(; ritor != tokens.rend(); ++ritor)
-    {
-        const std::string file_name_check(*ritor);
-        if(!FileTools::is_source_file(file_name_check))
-            continue;
-        last = file_name_check;
-        tokens.erase(--ritor.base());
-        break;
-    }
-
-    StringTools::tokenize(last, " ", tokens);
+    StringTools::tokenize2(rsp_content, " ", tokens);
 }
 
-/*static*/ void CompilerTools::retrive_obj_path(const std::vector<std::string> &tokens, std::string &obj_path)
+/*static*/ void CompilerTools::retrive_obj_path(const std::vector<std::string> &tokens, std::string &obj_path, std::string &obj_file)
 {
-    std::vector<std::string>::const_iterator fo_itor = std::find_if(tokens.begin(), tokens.end(), string_finder_pred("Fo\""));
+    std::string path;
+    std::vector<std::string>::const_iterator fo_itor = std::find_if(tokens.begin(), tokens.end(), string_finder_pred("/Fo"));
     if(fo_itor != tokens.end())
-    {
-        obj_path = ((*fo_itor).substr(3));
-        obj_path.erase(obj_path.length()-1);
-    }
+        path = ((*fo_itor).substr(3));
 
-    StringTools::str_replace(obj_path, "\\\\", "\\");
+    StringTools::str_replace(path, "\\\\", "\\");
+    StringTools::str_replace(path, "//", "//");
+    StringTools::str_replace(path, "\"", "");
+
+    boost::filesystem::path full_path(path);
+    obj_path = full_path.branch_path().string();
+    obj_file = full_path.filename().string();
 }
 
 /*static*/ bool CompilerTools::get_compilation_include_paths(const std::string &input, std::set<std::string> &folder_includes, std::string &error)

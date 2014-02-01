@@ -8,7 +8,7 @@ namespace vclcache {
 class ProcessRunner
 {
 public:
-    ProcessRunner(const std::string &arg);
+    ProcessRunner(int argc, char** argv);
 
     void run(const std::string &proc);
 

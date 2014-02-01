@@ -12,8 +12,8 @@ namespace vclcache {
 
 
 bool SourceAnalyzer::source_file_needs_recompilation_lmt(time_t obj_file_last_modification_time, 
-                                                     const std::set<std::string> &folder_includes, 
-                                                     std::set<std::string> &hash_includes)
+                                                         const std::set<std::string> &folder_includes, 
+                                                         std::set<std::string> &hash_includes)
 {
     for(std::set<std::string>::const_iterator hi_itor = hash_includes.begin(); hi_itor != hash_includes.end(); ++hi_itor)
     {
@@ -49,7 +49,7 @@ bool SourceAnalyzer::source_file_needs_recompilation_lmt(time_t obj_file_last_mo
         trace_ << "Opening " << existing_file_path << " for reading." << std::endl;
         std::string error;
         std::string file_source;
-        if(!FileTools::read_file_source(existing_file_path, file_source, error))
+        if(!FileTools::read_file_source(existing_file_path, file_source, error, strip_comments_))
         {
             if(!error.empty())
                 trace_ << error << std::endl;
@@ -75,8 +75,8 @@ bool SourceAnalyzer::source_file_needs_recompilation_lmt(time_t obj_file_last_mo
 }
 
 void SourceAnalyzer::source_file_needs_recompilation_hash(const std::set<std::string> &folder_includes, 
-                                                     std::set<std::string> &hash_includes, 
-                                                     std::set<std::string> &hash_includes_hashed)
+                                                          std::set<std::string> &hash_includes, 
+                                                          std::set<std::string> &hash_includes_hashed)
 {
     for(std::set<std::string>::const_iterator hi_itor = hash_includes.begin(); hi_itor != hash_includes.end(); ++hi_itor)
     {
@@ -93,7 +93,7 @@ void SourceAnalyzer::source_file_needs_recompilation_hash(const std::set<std::st
         trace_ << "Opening " << existing_file_path << " for reading." << std::endl;
         std::string error;
         std::string file_source;
-        if(!FileTools::read_file_source(existing_file_path, file_source, error))
+        if(!FileTools::read_file_source(existing_file_path, file_source, error, strip_comments_))
         {
             if(!error.empty())
                 trace_ << error << std::endl;
@@ -138,7 +138,9 @@ void SourceAnalyzer::source_file_needs_recompilation_hash(const std::set<std::st
     }
 }
 
-bool SourceAnalyzer::prepare_source_information(const std::string &src_file, const std::string &compilation_params, bool hash_method)
+bool SourceAnalyzer::prepare_source_information(const std::string &src_file, 
+                                                const std::string &compilation_params, 
+                                                bool hash_method)
 {
     std::string src_filename(src_file);
     StringTools::str_replace(src_filename, "\"", ""); // remove double quotas
@@ -154,7 +156,7 @@ bool SourceAnalyzer::prepare_source_information(const std::string &src_file, con
 
     trace_ << "Opening " << sfi_.get_src_filename() << " for reading." << std::endl;
     std::string error;
-    if(!FileTools::read_file_source(sfi_.get_src_filename(), file_source_, error))
+    if(!FileTools::read_file_source(sfi_.get_src_filename(), file_source_, error, strip_comments_))
     {
         if(!error.empty())
             trace_ << error << std::endl;
@@ -186,7 +188,8 @@ bool SourceAnalyzer::prepare_source_information(const std::string &src_file, con
     StringTools::str_replace(file_path_, "\\\\", "\\");
     trace_ << "Separated file name and path: " << file << ", " << file_path_ << std::endl;
 
-    sfi_.set_obj_filename(full_path.stem().string() + ".obj");
+    if(sfi_.get_obj_filename().empty())
+        sfi_.set_obj_filename(full_path.stem().string() + ".obj");
     trace_ << "Obj file name: " << sfi_.get_obj_filename() << std::endl;
 
     sfi_.set_hash_obj_filename(sfi_.get_hash_string() + ".obj");

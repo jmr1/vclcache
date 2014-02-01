@@ -10,7 +10,7 @@
 
 namespace vclcache {
 
-/*static*/ bool FileTools::read_file_source(const std::string &src_file_path, std::string &file_source, std::string &error)
+/*static*/ bool FileTools::read_file_source(const std::string &src_file_path, std::string &file_source, std::string &error, bool strip_comments)
 {
     std::ostringstream ss;
         
@@ -34,33 +34,36 @@ namespace vclcache {
 
     file_source = ss.str().c_str();
 
-    try
+    if(strip_comments)
     {
-        file_source = CompilerTools::strip_comments(file_source);
-    }
-    catch(boost::wave::cpplexer::lexing_exception &e)
-    {
-        ss.clear();
-        ss.str("");
-        ss << e.what() << " - " << e.description() << " - " << src_file_path <<  ":" << e.line_no() << ":" << e.column_no() << std::endl;
-        error = ss.str().c_str();
-        return false;
-    }
-    catch(boost::wave::cpplexer::cpplexer_exception &e)
-    {
-        ss.clear();
-        ss.str("");
-        ss << e.what() << " - " << e.description() << " - " << src_file_path <<  ":" << e.line_no() << ":" << e.column_no() << std::endl;
-        error = ss.str().c_str();
-        return false;
-    }
-    catch(std::exception &e)
-    {
-        ss.clear();
-        ss.str("");
-        ss << e.what() << std::endl;
-        error = ss.str().c_str();
-        return false;
+        try
+        {
+            file_source = CompilerTools::strip_comments(file_source);
+        }
+        catch(boost::wave::cpplexer::lexing_exception &e)
+        {
+            ss.clear();
+            ss.str("");
+            ss << e.what() << " - " << e.description() << " - " << src_file_path <<  ":" << e.line_no() << ":" << e.column_no() << std::endl;
+            error = ss.str().c_str();
+            return false;
+        }
+        catch(boost::wave::cpplexer::cpplexer_exception &e)
+        {
+            ss.clear();
+            ss.str("");
+            ss << e.what() << " - " << e.description() << " - " << src_file_path <<  ":" << e.line_no() << ":" << e.column_no() << std::endl;
+            error = ss.str().c_str();
+            return false;
+        }
+        catch(std::exception &e)
+        {
+            ss.clear();
+            ss.str("");
+            ss << e.what() << std::endl;
+            error = ss.str().c_str();
+            return false;
+        }
     }
         
     return true;

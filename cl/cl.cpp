@@ -45,7 +45,7 @@ int main(int argc, char** argv)
         return 1;
     }
 
-    ProcessRunner processRunner(argv[1]);
+    ProcessRunner processRunner(argc, argv);
 
     char *pCacheOff = std::getenv("VCLCACHE_OFF");
     if(pCacheOff && boost::iequals(pCacheOff, "true"))
@@ -61,23 +61,12 @@ int main(int argc, char** argv)
         use_hash = false;
     
     if(use_hash)
-        trace << "CLcache mode: file hashing." << std::endl;
+        trace << "vclcache mode: file hashing." << std::endl;
     else
-        trace << "CLcache mode: file last modified time." << std::endl;
+        trace << "vclcache mode: file last modified time." << std::endl;
 
-    std::string error;
-    std::string rsp_content;
-    const std::string rsp_file(std::string(argv[1]).substr(1));
-    trace << "Opening " << rsp_file << std::endl;
-    if(!FileTools::read_utf16le(rsp_file, rsp_content, error))
-    {
-        trace << error << std::endl;
-        return 1;
-    }
-    trace << "Rsp file content: " << rsp_content << std::endl;
-    trace << std::endl;
-
-	std::string cachedir("C:\\.cache");
+    
+    std::string cachedir("C:\\.cache");
 	char *pCacheDir = std::getenv("VCLCACHE_DIR");
 	if(pCacheDir)
         cachedir = pCacheDir;
@@ -97,36 +86,62 @@ int main(int argc, char** argv)
     global_info gi;
     gi.cachedir_ = cachedir;
 
-    // Substracting compilation parameters
-    size_t pos = rsp_content.find("errorReport");
-    if(pos != std::string::npos)
-        pos = rsp_content.find(" ", pos);
-    if(pos == std::string::npos)
+    std::string error;
+    std::string cmd_content;
+    if(argc == 2)
     {
-        trace << "Error: couldn't find errorReport parameter. Exiting." << std::endl;
-        return 1;
+        const std::string rsp_file(std::string(argv[1]).substr(1));
+        trace << "Opening " << rsp_file << std::endl;
+        if(!FileTools::read_utf16le(rsp_file, cmd_content, error))
+        {
+            trace << error << std::endl;
+            return 1;
+        }
+        trace << "Rsp file content: " << cmd_content << std::endl;
+
+        CompilerTools::tokenize_params(cmd_content, gi.tokens_);
+        trace << "-- Begin tokenized compilation parameters --" << std::endl;
+        std::copy(gi.tokens_.begin(), gi.tokens_.end(), std::ostream_iterator<std::string>(*trace, "\n"));
+        trace << "-- End tokenized compilation parameters --" << std::endl;
+        trace << std::endl;
     }
-    const std::string compilation_params = rsp_content.substr(0, pos);
+    else
+    {
+        for(int x = 1; x < argc; ++x)
+            gi.tokens_.push_back(argv[x]);
+
+        trace << "-- Begin tokenized compilation parameters --" << std::endl;
+        std::copy(gi.tokens_.begin(), gi.tokens_.end(), std::ostream_iterator<std::string>(*trace, "\n"));
+        trace << "-- End tokenized compilation parameters --" << std::endl;
+        trace << std::endl;
+    }
+    trace << std::endl;
+
+    const std::string compilation_params = cmd_content;
     trace << "Compilation parameters: " << compilation_params << std::endl;
     trace << std::endl;
 
         
-    CompilerTools::tokenize_params(rsp_content, gi.tokens_);
-    trace << "-- Begin tokenized compilation parameters --" << std::endl;
-    std::copy(gi.tokens_.begin(), gi.tokens_.end(), std::ostream_iterator<std::string>(*trace, "\n"));
-    trace << "-- End tokenized compilation parameters --" << std::endl;
-    trace << std::endl;
+    bool strip_comments = true;
+    char *pStripComments = std::getenv("VCLCACHE_STRIP_COMMENTS");
+    if(pStripComments && boost::iequals(pStripComments, "false"))
+        strip_comments = false;
 
-    CompilerTools::retrive_obj_path(gi.tokens_, gi.obj_path_);
+    std::string obj_filename;
+    CompilerTools::retrive_obj_path(gi.tokens_, gi.obj_path_, obj_filename);
 
     
     std::vector<source_file_info> files_info_vec;
-    std::vector<std::string>::const_iterator files_itor = std::find_if(gi.tokens_.begin(), gi.tokens_.end(), string_finder_pred("errorReport"));
-    ++files_itor;
+    std::vector<std::string>::const_iterator files_itor = std::find_if(gi.tokens_.begin(), gi.tokens_.end(), FileTools::is_source_file);
     for(; files_itor != gi.tokens_.end(); ++files_itor)
     {
+        if(!FileTools::is_source_file(*files_itor))
+            continue;
+
         source_file_info sfi(gi);
-        SourceAnalyzer srcAnalyzer(*trace, gi, sfi);
+        if(!obj_filename.empty() && obj_filename.find(".obj") != std::string::npos)
+            sfi.set_obj_filename(obj_filename);
+        SourceAnalyzer srcAnalyzer(*trace, gi, sfi, strip_comments);
 
         if(!srcAnalyzer.prepare_source_information(*files_itor, compilation_params, use_hash))
             continue;
@@ -137,7 +152,7 @@ int main(int argc, char** argv)
 
             std::set<std::string> folder_includes;
             std::set<std::string> hash_includes;
-            if(!srcAnalyzer.prepare_for_analysis(rsp_content, folder_includes, hash_includes))
+            if(!srcAnalyzer.prepare_for_analysis(cmd_content, folder_includes, hash_includes))
                 continue;
 
             if(use_hash)
@@ -154,7 +169,7 @@ int main(int argc, char** argv)
 
                 std::set<std::string> folder_includes;
                 std::set<std::string> hash_includes;
-                if(!srcAnalyzer.prepare_for_analysis(rsp_content, folder_includes, hash_includes))
+                if(!srcAnalyzer.prepare_for_analysis(cmd_content, folder_includes, hash_includes))
                     continue;
 
                 srcAnalyzer.analyze_source_and_dependencies_cached_hash(folder_includes, hash_includes);

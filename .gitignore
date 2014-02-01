@@ -5,5 +5,7 @@ lib64/
 Debug/
 Release/
 cl/x64/
+ipch/
 vclcache.sdf
 vclcache.suo
+vclcache.opensdf

@@ -4,9 +4,10 @@
 
 namespace vclcache {
 
-ProcessRunner::ProcessRunner(const std::string &arg)
+ProcessRunner::ProcessRunner(int argc, char** argv)
 {
-    args_.push_back(arg);
+    for(int x = 1; x < argc; ++x)
+        args_.push_back(argv[x]);
 }
 
 void ProcessRunner::run(const std::string &proc)
