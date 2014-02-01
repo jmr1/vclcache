@@ -33,7 +33,8 @@ namespace vclcache {
 
 /*static*/ void CompilerTools::tokenize_params(const std::string &rsp_content, std::vector<std::string> &tokens)
 {
-    StringTools::tokenize(rsp_content, "/", tokens);
+    //StringTools::tokenize2(rsp_content, "/", tokens);
+    StringTools::tokenize2(rsp_content, " ", tokens);
 
     std::string last;
     std::vector<std::string>::reverse_iterator ritor = tokens.rbegin();
@@ -47,7 +48,7 @@ namespace vclcache {
         break;
     }
 
-    StringTools::tokenize(last, " ", tokens);
+    StringTools::tokenize2(last, " ", tokens);
 }
 
 /*static*/ void CompilerTools::retrive_obj_path(const std::vector<std::string> &tokens, std::string &obj_path)

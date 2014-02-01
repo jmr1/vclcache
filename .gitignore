@@ -1,0 +1,9 @@
+include32/
+include64/
+lib32/
+lib64/
+Debug/
+Release/
+cl/x64/
+vclcache.sdf
+vclcache.suo
