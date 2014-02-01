@@ -1,5 +1,5 @@
 vclcache - a c++ compiler cache for Microsoft Visual Studio
-===========================================================
+-----------------------------------------------------------
 
 vclcache attempts to avoid unnecessary recompilation by reusing previously cached object files if possible. It is meant to be called instead of the original cl.exe executable. The program analyses the command line, source file and its header dependencies to decide whether the source file is to be compiled. If so, a cache will be queried for a previously stored object file.
 
@@ -16,7 +16,7 @@ In below locations rename original cl.exe into cl_real.exe and make a copy of it
 - 32 to 64 bit cross compilation in C:\Program Files (x86)\Microsoft Visual Studio 10.0\VC\bin\x86_amd64 (VS ide on 64 bit Windows also uses that)
 - 64 bit compilation in C:\Program Files (x86)\Microsoft Visual Studio 10.0\VC\bin\amd64
 
-Rename vclcache.exe into cl.exe and copy to the above locations making sure 32 bit version of vclcache is copied into first 2 location and 64bit version into 64 bit location. Also copy dll's the vclcache depends on or add the dll location to the PATH.
+Copy already built cl.exe into above locations making sure 32 bit version of cl.exe is copied into first 2 location and 64bit version into 64 bit location. Also copy dll's the new cl.exe depends on or add the dll location to the PATH.
 
 
 Environment Variables
