@@ -172,7 +172,7 @@ int main(int argc, char** argv)
                 if(!srcAnalyzer.prepare_for_analysis(cmd_content, folder_includes, hash_includes))
                     continue;
 
-                srcAnalyzer.analyze_source_and_dependencies_cached_hash(folder_includes, hash_includes);
+                srcAnalyzer.analyze_source_and_dependencies_hash(folder_includes, hash_includes);
             }
             else
             {

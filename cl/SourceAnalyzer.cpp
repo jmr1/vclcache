@@ -65,7 +65,7 @@ bool SourceAnalyzer::source_file_needs_recompilation_lmt(time_t obj_file_last_mo
                 trace_ << error << std::endl;
             continue;
         }
-        std::copy(hash_includes.begin(), hash_includes.end(), std::ostream_iterator<std::string>(trace_, "\n"));
+        std::copy(local_hash_includes.begin(), local_hash_includes.end(), std::ostream_iterator<std::string>(trace_, "\n"));
         trace_ << std::endl;
         if(source_file_needs_recompilation_lmt(obj_file_last_modification_time, folder_includes, local_hash_includes))
             return true;
@@ -119,10 +119,6 @@ void SourceAnalyzer::source_file_needs_recompilation_hash(const std::set<std::st
 
         hash_includes_hashed.insert(existing_file_path);
 
-        const std::string hash_path_cached_full = gi_.cachedir_ + "\\" + hash_path_cached;
-        if(!boost::filesystem::exists(hash_path_cached_full))
-            sfi_.get_hash_include_files_to_cache()[hash_path_cached_full] = existing_file_path;
-
         trace_ << "Getting #includes for " << existing_file_path << std::endl;
         error.clear();
         std::set<std::string> local_hash_includes;
@@ -132,7 +128,7 @@ void SourceAnalyzer::source_file_needs_recompilation_hash(const std::set<std::st
                 trace_ << error << std::endl;
             continue;
         }
-        std::copy(hash_includes.begin(), hash_includes.end(), std::ostream_iterator<std::string>(trace_, "\n"));
+        std::copy(local_hash_includes.begin(), local_hash_includes.end(), std::ostream_iterator<std::string>(trace_, "\n"));
         trace_ << std::endl;
         source_file_needs_recompilation_hash(folder_includes, local_hash_includes, hash_includes_hashed);
     }
@@ -147,13 +143,6 @@ bool SourceAnalyzer::prepare_source_information(const std::string &src_file,
 
     sfi_.set_src_filename(src_filename);
     trace_ << "Source file name and path: " << sfi_.get_src_filename() << std::endl;
-
-    if(!FileTools::is_source_file(sfi_.get_src_filename()))
-    {
-        trace_ << "Not a source file, skipping " << sfi_.get_src_filename() << std::endl;
-        return false;
-    }
-
     trace_ << "Opening " << sfi_.get_src_filename() << " for reading." << std::endl;
     std::string error;
     if(!FileTools::read_file_source(sfi_.get_src_filename(), file_source_, error, strip_comments_))
@@ -237,8 +226,12 @@ void SourceAnalyzer::analyze_source_and_dependencies_cached_hash(std::set<std::s
 
     std::string all_dep_hash = sfi_.get_hash_string();
     std::set<std::string>::const_iterator hih_itor = hash_includes_hashed.begin();
+    std::map<std::string, std::string>::const_iterator map_itor;
     for(; hih_itor != hash_includes_hashed.end(); ++hih_itor)
-        all_dep_hash += *hih_itor;
+    {
+        if((map_itor = gi_.include_file_to_hash_map_.find(*hih_itor)) != gi_.include_file_to_hash_map_.end())
+            all_dep_hash += map_itor->second;
+    }
 
     boost::hash<std::string> string_hash;
     std::ostringstream ss;
@@ -247,12 +240,6 @@ void SourceAnalyzer::analyze_source_and_dependencies_cached_hash(std::set<std::s
     trace_ << "Source file with all header dependencies hashed: " << all_dep_hash_hashed << std::endl;
 
     sfi_.set_file_needs_recompilation(false);
-    if(!sfi_.get_hash_include_files_to_cache().empty())
-    {
-        trace_ << sfi_.get_hash_include_files_to_cache().size() << " header dependency files modified, marked for recompilation." << std::endl;
-        sfi_.set_file_needs_recompilation(true);
-    }
-                
     if(!boost::filesystem::exists(all_dep_hash_hashed))
     {
         trace_ << "Source file with all header dependencies does not exist, marked for recompilation." << std::endl;
@@ -279,8 +266,12 @@ void SourceAnalyzer::analyze_source_and_dependencies_hash(std::set<std::string> 
 
     std::string all_dep_hash = sfi_.get_hash_string();
     std::set<std::string>::const_iterator hih_itor = hash_includes_hashed.begin();
+    std::map<std::string, std::string>::const_iterator map_itor;
     for(; hih_itor != hash_includes_hashed.end(); ++hih_itor)
-        all_dep_hash += *hih_itor;
+    {
+        if((map_itor = gi_.include_file_to_hash_map_.find(*hih_itor)) != gi_.include_file_to_hash_map_.end())
+            all_dep_hash += map_itor->second;
+    }
 
     boost::hash<std::string> string_hash;
     std::ostringstream ss;
