@@ -117,7 +117,13 @@ int main(int argc, char** argv)
     }
     trace << std::endl;
 
-    const std::string compilation_params = cmd_content;
+    std::string compilation_params;
+    std::vector<std::string>::const_iterator tokens_itor;
+    for(tokens_itor = gi.tokens_.begin(); tokens_itor != gi.tokens_.end(); ++tokens_itor)
+    {
+        if(!FileTools::is_source_file(*tokens_itor))
+            compilation_params += *tokens_itor;
+    }
     trace << "Compilation parameters: " << compilation_params << std::endl;
     trace << std::endl;
 
