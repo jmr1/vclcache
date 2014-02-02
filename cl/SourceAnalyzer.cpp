@@ -218,7 +218,7 @@ bool SourceAnalyzer::prepare_for_analysis(const std::string &rsp_content,
 }
 
 void SourceAnalyzer::analyze_source_and_dependencies_cached_hash(std::set<std::string> &folder_includes,
-                                                            std::set<std::string> &hash_includes)
+                                                                 std::set<std::string> &hash_includes)
 {
     trace_ << "Starting 'hash' determining method if file needs recompilation." << std::endl;
     std::set<std::string> hash_includes_hashed;
@@ -249,7 +249,7 @@ void SourceAnalyzer::analyze_source_and_dependencies_cached_hash(std::set<std::s
 }
 
 void SourceAnalyzer::analyze_source_and_dependencies_cached_lmt(std::set<std::string> &folder_includes,
-                                                            std::set<std::string> &hash_includes)
+                                                                std::set<std::string> &hash_includes)
 {
     trace_ << "Starting 'last modified time' determining method if file needs recompilation." << std::endl;
     time_t obj_file_last_modification_time = boost::filesystem::last_write_time(sfi_.get_obj_fullpath_cached_mod());
@@ -259,7 +259,7 @@ void SourceAnalyzer::analyze_source_and_dependencies_cached_lmt(std::set<std::st
 }
 
 void SourceAnalyzer::analyze_source_and_dependencies_hash(std::set<std::string> &folder_includes,
-                                                     std::set<std::string> &hash_includes)
+                                                          std::set<std::string> &hash_includes)
 {
     std::set<std::string> hash_includes_hashed;
     source_file_needs_recompilation_hash(folder_includes, hash_includes, hash_includes_hashed);
