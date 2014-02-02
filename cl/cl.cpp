@@ -51,7 +51,12 @@ int main(int argc, char** argv)
     if(pCacheOff && boost::iequals(pCacheOff, "true"))
     {
         trace << "VCLCACHE_OFF=true, will not be using cache, invoking cl_real.exe" << std::endl;
-        processRunner.run("cl_real.exe");
+        std::string error;
+        if(!processRunner.run("cl_real.exe", error))
+        {
+            trace << error << std::endl;
+            return 1;
+        }
         return 0;
     }
 
@@ -196,8 +201,18 @@ int main(int argc, char** argv)
     }
 
     Cache cache(*trace);
-    cache.use_cache(files_info_vec);
-    cache.cache_files(files_info_vec, use_hash, processRunner);
+    if(!cache.use_cache(files_info_vec))
+    {
+        trace << "Invoking cl_real.exe" << std::endl;
+        std::string error;
+        if(!processRunner.run("cl_real.exe", error))
+        {
+            trace << error << std::endl;
+            return 1;
+        }
+
+        cache.cache_files(files_info_vec, use_hash);
+    }
 
     trace << std::endl;
 #ifndef USE_CONSOLE

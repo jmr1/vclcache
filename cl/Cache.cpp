@@ -5,13 +5,12 @@
 #include <Poco/Pipe.h>
 
 #include "source_file_info.h"
-#include "ProcessRunner.h"
 
 namespace vclcache {
 
-void Cache::use_cache(std::vector<source_file_info> &files_info_vec)
+bool Cache::use_cache(std::vector<source_file_info> &files_info_vec)
 {
-    cache_used_ = true;
+    bool cache_used = true;
     for(std::vector<source_file_info>::iterator file_itor = files_info_vec.begin(); file_itor != files_info_vec.end(); ++file_itor)
     {
         if(!file_itor->get_file_needs_recompilation())
@@ -22,21 +21,17 @@ void Cache::use_cache(std::vector<source_file_info> &files_info_vec)
         }
         else
         {
-            cache_used_ = false;
+            cache_used = false;
             trace_ << "File " << file_itor->get_obj_fullpath_cached() << " does not exist, need to compile" << std::endl;
         }
     }
+
+    return cache_used;
 }
 
 
-void Cache::cache_files(std::vector<source_file_info> &files_info_vec, bool use_hash, ProcessRunner &processRunner)
+void Cache::cache_files(std::vector<source_file_info> &files_info_vec, bool use_hash)
 {
-    if(cache_used_)
-        return;
-
-    trace_ << "Invoking cl_real.exe" << std::endl;
-    processRunner.run("cl_real.exe");
-
     for(std::vector<source_file_info>::iterator file_itor = files_info_vec.begin(); file_itor != files_info_vec.end(); ++file_itor)
     {
         if(boost::filesystem::exists(file_itor->get_obj_fullpath()))

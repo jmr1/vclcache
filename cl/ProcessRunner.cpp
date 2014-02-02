@@ -1,6 +1,6 @@
 #include "ProcessRunner.h"
 
-#include <Poco/Pipe.h>
+#include <Poco/Exception.h>
 
 namespace vclcache {
 
@@ -10,10 +10,31 @@ ProcessRunner::ProcessRunner(int argc, char** argv)
         args_.push_back(argv[x]);
 }
 
-void ProcessRunner::run(const std::string &proc)
+bool ProcessRunner::run(const std::string &proc, std::string &error)
 {
-    Poco::ProcessHandle process = Poco::Process::launch(proc, args_, NULL, NULL, NULL);
-    process.wait();
+    
+    try
+    {
+        Poco::ProcessHandle process = Poco::Process::launch(proc, args_, NULL, NULL, NULL);
+        process.wait();
+    }
+    catch(Poco::Exception &e)
+    {
+        error = e.displayText();
+        return false;
+    }
+    catch(std::exception &e)
+    {
+        error = e.what();
+        return false;
+    }
+    catch(...)
+    {
+        error = "ProcessRunner::run other error.";
+        return false;
+    }
+
+    return true;
 }
 
 }
