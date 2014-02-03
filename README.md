@@ -9,14 +9,15 @@ The program also supports multiple source files in one invocation, can process w
 Installation
 ------------
 
-Build 32 bit and 64 bit version of vclcache.
+Build 32 bit version of vclcache (optionally 64 bit version for 64 bit compilation but it is not necessary).
 
-In below locations rename original cl.exe into cl_real.exe and make a copy of its corresponding cl.exe.config to cl_real.exe.config (your paths may be different):
+In the below locations rename original cl.exe into cl_real.exe and make a copy of its corresponding cl.exe.config to cl_real.exe.config (your paths may be different):
 - 32bit compilation in C:\Program Files (x86)\Microsoft Visual Studio 10.0\VC\bin
 - 32 to 64 bit cross compilation in C:\Program Files (x86)\Microsoft Visual Studio 10.0\VC\bin\x86_amd64 (VS ide on 64 bit Windows also uses that)
 - 64 bit compilation in C:\Program Files (x86)\Microsoft Visual Studio 10.0\VC\bin\amd64
 
-Copy already built cl.exe into above locations making sure 32 bit version of cl.exe is copied into first 2 locations and 64bit version into 64 bit location. Also copy dll's the new cl.exe depends on or add the dll location to the PATH.
+Copy already built cl.exe into above locations. Optionally copy 64 bit version of cl.exe into 64 bit location but 32 bit cl.exe will work too (64 bit cl.exe version in 32 bit locations won't work). 
+Also copy all the dll's the new cl.exe depends on or add the dll location to the PATH.
 
 
 Environment Variables
