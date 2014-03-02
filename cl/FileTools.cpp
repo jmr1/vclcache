@@ -38,6 +38,7 @@ namespace vclcache {
     {
         try
         {
+            file_source += "\n"; //add new line to avoid parser error (Unterminated C++ style comment)
             file_source = CompilerTools::strip_comments(file_source);
         }
         catch(boost::wave::cpplexer::lexing_exception &e)
