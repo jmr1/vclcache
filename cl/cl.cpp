@@ -42,6 +42,9 @@ int main(int argc, char** argv)
     if(argc < 2)
     {
         trace << "Error: not enough program arguments - " << argc << ". Exiting" << std::endl;
+#ifndef USE_CONSOLE
+        myfile.close();
+#endif
         return 1;
     }
 
@@ -55,8 +58,14 @@ int main(int argc, char** argv)
         if(!processRunner.run("cl_real.exe", error))
         {
             trace << error << std::endl;
+#ifndef USE_CONSOLE
+            myfile.close();
+#endif
             return 1;
         }
+#ifndef USE_CONSOLE
+        myfile.close();
+#endif
         return 0;
     }
 
@@ -83,6 +92,9 @@ int main(int argc, char** argv)
         if(!boost::filesystem::create_directories(cachedir))
         {
             trace << "Error: failed creating cache directory in " << cachedir << ". Exiting." << std::endl;
+#ifndef USE_CONSOLE
+            myfile.close();
+#endif
             return 1;
         }
         trace << std::endl;
