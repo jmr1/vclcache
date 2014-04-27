@@ -15,14 +15,21 @@ bool Cache::use_cache(std::vector<source_file_info> &files_info_vec)
     {
         if(!file_itor->get_file_needs_recompilation())
         {
-            trace_ << "File " << file_itor->get_obj_fullpath_cached() << " exist, using cache." << std::endl;
+            trace_ << "File " << file_itor->get_obj_fullpath_cached_mod() << " [ " << file_itor->get_obj_fullpath_cached() << " ] " << " exist, using cache." << std::endl;
             boost::filesystem::copy_file(file_itor->get_obj_fullpath_cached_mod(), file_itor->get_obj_fullpath(), boost::filesystem::copy_option::overwrite_if_exists);
+
+            if(boost::filesystem::last_write_time(file_itor->get_obj_fullpath()) < file_itor->get_last_modification_time())
+            {
+                trace_ << "Last modification time of " << file_itor->get_obj_fullpath_cached() << " is older than " << file_itor->get_src_filename() << ", updating timestamp." << std::endl;
+                boost::filesystem::last_write_time(file_itor->get_obj_fullpath(), time(NULL));
+            }
+
             file_itor->set_cache_used(true);
         }
         else
         {
             cache_used = false;
-            trace_ << "File " << file_itor->get_obj_fullpath_cached() << " does not exist, need to compile" << std::endl;
+            trace_ << "File " << file_itor->get_obj_fullpath_cached_mod() << " [ " << file_itor->get_obj_fullpath_cached() << " ] " << " does not exist, need to compile" << std::endl;
         }
     }
 

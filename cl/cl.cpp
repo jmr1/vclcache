@@ -33,6 +33,7 @@ int main(int argc, char** argv)
     Logger<std::ostream> trace(std::cout);
 #endif
 
+    trace << "############################ BEGIN ############################" << std::endl;
     trace << "Current directory: " << boost::filesystem::current_path().string() << std::endl;
     trace << "Listing program arguments:" << std::endl;
     for(int x = 0; x < argc; ++x)
